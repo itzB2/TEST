@@ -20,7 +20,7 @@ class Screen:
 		self.upscalling = upscalling
 
 		self.design = pygame.Surface([self.x, self.y])
-		self.window = pygame.display.set_mode([self.x*upscalling+200, self.y*upscalling+200])
+		self.window = pygame.display.set_mode([self.x*upscalling, self.y*upscalling])
 
 	def setPixel(self, coordinates, data, xor=False):
 		x = int(coordinates/self.x)
@@ -53,9 +53,7 @@ class Screen:
 
 			# print(x, y, len(self.grid), len(self.grid[0]))
 			pixel = self.grid[x][y]
-			if pixel == 0:
-				color = (0, 0, 0)
-			elif pixel == 1:
+			if pixel == 1:
 				color = (200, 200, 200)
 			# print(f"X: {x}, Y: {y}, Index: {i}, Color: {color}")
 
