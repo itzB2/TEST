@@ -16,7 +16,6 @@ class Screen:
 		self.x = size[0]
 		self.y = size[1]
 		self.grid = [[0 for i in range(64)] for j in range(32)] 
-		self.grid = np.array(self.grid).T
 
 		self.upscalling = upscalling
 
@@ -29,7 +28,7 @@ class Screen:
 		xFloat = coordinates/self.x
 		yFloat = coordinates%self.x
 
-		print((x,y),(xFloat, yFloat))
+		# print((x,y),(xFloat, yFloat))
 
 		if xor:
 			self.grid[x][y] ^= data
@@ -47,8 +46,8 @@ class Screen:
 	def draw(self):
 
 		for i in range(2047):
-			x = int(i%self.x)
-			y = int(i/self.x)
+			x = int(i/self.x)
+			y = int(i%self.x)
 
 			color = 0
 
@@ -70,7 +69,6 @@ class Screen:
 
 	def clear(self):
 		self.grid = [[0 for i in range(64)] for j in range(32)] 
-		self.grid = np.array(self.grid).T
 
 	def clearDebug(self):
 		pass
@@ -291,6 +289,8 @@ class CHIP8:
 		self.opcode = self.memory[self.pc] << 8 | self.memory[self.pc+1]
 		opcode = self.memory[self.pc] << 8 | self.memory[self.pc+1]
 
+		self.pc = self.pc+2
+
 		x = (self.opcode & 0x0f00) >> 8
 		y = (self.opcode & 0x00f0) >> 4
 		n = self.opcode & 0x000F
@@ -301,112 +301,145 @@ class CHIP8:
 			if opcode == 0x00E0:
 				print(f"Calling opcode: {opcode}, Name:00E0, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_00E0()
+				pc += 2
 			elif opcode == 0x00EE:
 				print(f"Calling opcode: {opcode}, Name:00EE, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_00EE()
+				pc += 2
 		elif (opcode & 0xF000) == 0x1000:
 			print(f"Calling opcode: {opcode}, Name:1NNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_1NNN(nnn)
+			pc += 2
 		elif (opcode & 0xF000) == 0x2000:
 			print(f"Calling opcode: {opcode}, Name:2NNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_2NNN()
+			pc += 2
 		elif (opcode & 0xF000) == 0x3000:
 			print(f"Calling opcode: {opcode}, Name:3XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_3XNN()
+			pc += 2
 		elif (opcode & 0xF000) == 0x4000:
 			print(f"Calling opcode: {opcode}, Name:4XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_4XNN()
+			pc += 2
 		elif (opcode & 0xF000) == 0x5000:
 			print(f"Calling opcode: {opcode}, Name:5XY0, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_5XY0()
+			pc += 2
 		elif (opcode & 0xF000) == 0x6000:
 			print(f"Calling opcode: {opcode}, Name:6XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_6XNN(x, nn)
+			pc += 2
 		elif (opcode & 0xF000) == 0x7000:
 			print(f"Calling opcode: {opcode}, Name:7XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_7XNN(x, nn)
+			pc += 2
 		elif (opcode & 0xF000) == 0x8000:
 			if (opcode & 0xF) == 0x0:
 				print(f"Calling opcode: {opcode}, Name:8XY0, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY0()
+				pc += 2
 			elif opcode == 0x1:
 				print(f"Calling opcode: {opcode}, Name:8XY1, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY1()
+				pc += 2
 			elif opcode == 0x2:
 				print(f"Calling opcode: {opcode}, Name:8XY2, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY2()
+				pc += 2
 			elif opcode == 0x3:
 				print(f"Calling opcode: {opcode}, Name:8XY3, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY3()
+				pc += 2
 			elif opcode == 0x4:
 				print(f"Calling opcode: {opcode}, Name:8XY4, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY4()
+				pc += 2
 			elif opcode == 0x5:
 				print(f"Calling opcode: {opcode}, Name:8XY5, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY5()
+				pc += 2
 			elif opcode == 0x6:
 				print(f"Calling opcode: {opcode}, Name:8XY6, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY6()
+				pc += 2
 			elif opcode == 0x7:
 				print(f"Calling opcode: {opcode}, Name:8XY7, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XY7()
+				pc += 2
 			elif opcode == 0xE:
 				print(f"Calling opcode: {opcode}, Name:8XY8, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_8XYE()
+				pc += 2
 		elif (opcode & 0xF000) == 0x9000:
 			print(f"Calling opcode: {opcode}, Name:9XY0, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_9XY0()
+			pc += 2
 		elif (opcode & 0xF000) == 0xA000:
 			print(f"Calling opcode: {opcode}, Name:ANNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_ANNN(nnn)
+			pc += 2
 		elif (opcode & 0xF000) == 0xB000:
 			print(f"Calling opcode: {opcode}, Name:BNNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_BNNN()
+			pc += 2
 		elif (opcode & 0xF000) == 0xC000:
 			print(f"Calling opcode: {opcode}, Name:CXKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_CXKK()
+			pc += 2
 		elif (opcode & 0xF000) == 0xD000:
 			print(f"Calling opcode: {opcode}, Name:DXYN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_DXYN(x, y, n)
+			pc += 2
 		elif (opcode & 0xF000) == 0xE000:
 			if (opcode & 0xF) == 0x9E:
 				print(f"Calling opcode: {opcode}, Name:EX9E, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_EX9E()
+				pc += 2
 			elif (opcode & 0xF) == 0xA1:
 				print(f"Calling opcode: {opcode}, Name:EXA1, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_EXA1()
+				pc += 2
 		elif (opcode & 0xF000) == 0xF000:
 			if (opcode & 0xF) == 0x07:
 				print(f"Calling opcode: {opcode}, Name:FX07, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX07()
+				pc += 2
 			elif (opcode & 0xF) == 0x0A:
 				print(f"Calling opcode: {opcode}, Name:FX0A, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX0A()
+				pc += 2
 			elif (opcode & 0xF) == 0x15:
 				print(f"Calling opcode: {opcode}, Name:FX15, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX15()
+				pc += 2
 			elif (opcode & 0xF) == 0x18:
 				print(f"Calling opcode: {opcode}, Name:FX18, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX18()
+				pc += 2
 			elif (opcode & 0xF) == 0x1E:
 				print(f"Calling opcode: {opcode}, Name:FX1E, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX1E()
+				pc += 2
 			elif (opcode & 0xF) == 0x29:
 				print(f"Calling opcode: {opcode}, Name:FX29, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX29()
+				pc += 2
 			elif (opcode & 0xF) == 0x33:
 				print(f"Calling opcode: {opcode}, Name:FX33, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX33()
+				pc += 2
 			elif (opcode & 0xF) == 0x55:
 				print(f"Calling opcode: {opcode}, Name:FX55, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX55()
+				pc += 2
 			elif (opcode & 0xF) == 0x65:
 				print(f"Calling opcode: {opcode}, Name:FX65, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 				self.OP_FX65()
+				pc += 2
 		else:
 			print(f"Unknown opcode: {opcode}, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-
-		pc += 2
+			pc += 2
 
 		if self.delayTimer > 0:
 			self.delayTimer -= 1
