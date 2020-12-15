@@ -1,10 +1,15 @@
 import pygame
 from random import random
 import numpy as np
+import time
 
 def DrawPixel(surface, Pixelcolor, pos, scale):
     pygame.draw.rect(surface, Pixelcolor, pygame.Rect(pos[0], pos[1], scale, scale)) 
 
+def callTick(f, ticks):
+	for i in range(ticks):
+		time.sleep(1/ticks)
+		f()
 
 class Screen:
 	def __init__(self,size, upscalling=10):
@@ -412,23 +417,18 @@ class CHIP8:
 			self.soundTimer -= 1
 
 	def cycle(self):
-		clock = pygame.time.Clock()
 		while True:
-			clock.tick(60)
 			try:
-				self.execute()
+				callTick(self.execute, 60)
 			except:
 				break
 
 	def start(self):
-		clock = pygame.time.Clock()
 		done = False
 		while not done:
-			clock.tick(60)
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					done = True
-			
 			self.cycle()
 			if self.drawFlag:
 				self.graphics.draw()
