@@ -129,8 +129,7 @@ class CHIP8:
 	def OP_00EE(self):
 		pass
 
-	def OP_1NNN(self):
-		nnn = self.opcode.nnn
+	def OP_1NNN(self ,nnn):
 		pc = nnn
 
 	def OP_2NNN(self):
@@ -145,15 +144,10 @@ class CHIP8:
 	def OP_5XY0(self):
 		pass
 
-	def OP_6XNN(self):
-		nn = self.opcode.nn
-		Vx = self.opcode.x
+	def OP_6XNN(self, nn, Vx):
 		self.V[Vx] = nn
 
-	def OP_7XNN(self):
-		Vx  = self.opcode.x
-		nn = self.opcode.nn
-
+	def OP_7XNN(self, nn, Vx):
 		self.V[Vx] += nn
 
 	def OP_8XY0(self):
@@ -186,8 +180,7 @@ class CHIP8:
 	def OP_9XY0(self):
 		pass
 
-	def OP_ANNN(self):
-		nnn = self.opcode.nnn
+	def OP_ANNN(self, nnn):
 		self.I = nnn
 
 	def OP_BNNN(self):
@@ -196,12 +189,12 @@ class CHIP8:
 	def OP_CXNN(self):
 		pass
 
-	def OP_DXYN(self):
+	def OP_DXYN(self, Vx, Vy, n):
 		print("Drawing")
 		self.V[0xF] = 0
-		x = self.V[self.opcode.x] & 0xFF
-		y = self.V[self.opcode.y] & 0xFF
-		height = self.opcode.n
+		x = self.V[Vx] & 0xFF
+		y = self.V[Vy] & 0xFF
+		height = n
 		row = 0
 
 		while row < height:
@@ -295,6 +288,9 @@ class CHIP8:
 
 		x = (self.opcode & 0x0f00) >> 8
 		y = (self.opcode & 0x00f0) >> 4
+		n = self.opcode & 0x000F
+		nn = self.opcode & 0x00FF
+		nnn = self.opcode & 0x0FFF
 
 		if (opcode & 0xF000) == 0x0000:
 			if opcode == 0x00E0:
@@ -305,7 +301,7 @@ class CHIP8:
 				self.OP_00EE()
 		elif (opcode & 0xF000) == 0x1000:
 			print(f"Calling opcode: {opcode}, Name:1NNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-			self.OP_1NNN()
+			self.OP_1NNN(nnn)
 		elif (opcode & 0xF000) == 0x2000:
 			print(f"Calling opcode: {opcode}, Name:2NNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_2NNN()
@@ -320,10 +316,10 @@ class CHIP8:
 			self.OP_5XY0()
 		elif (opcode & 0xF000) == 0x6000:
 			print(f"Calling opcode: {opcode}, Name:6XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-			self.OP_6XNN()
+			self.OP_6XNN(x, nn)
 		elif (opcode & 0xF000) == 0x7000:
 			print(f"Calling opcode: {opcode}, Name:7XKK, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-			self.OP_7XNN()
+			self.OP_7XNN(x, nn)
 		elif (opcode & 0xF000) == 0x8000:
 			if (opcode & 0xF) == 0x0:
 				print(f"Calling opcode: {opcode}, Name:8XY0, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
@@ -357,7 +353,7 @@ class CHIP8:
 			self.OP_9XY0()
 		elif (opcode & 0xF000) == 0xA000:
 			print(f"Calling opcode: {opcode}, Name:ANNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-			self.OP_ANNN()
+			self.OP_ANNN(nnn)
 		elif (opcode & 0xF000) == 0xB000:
 			print(f"Calling opcode: {opcode}, Name:BNNN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
 			self.OP_BNNN()
@@ -366,7 +362,7 @@ class CHIP8:
 			self.OP_CXKK()
 		elif (opcode & 0xF000) == 0xD000:
 			print(f"Calling opcode: {opcode}, Name:DXYN, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
-			self.OP_DXYN()
+			self.OP_DXYN(x, y, n)
 		elif (opcode & 0xF000) == 0xE000:
 			if (opcode & 0xF) == 0x9E:
 				print(f"Calling opcode: {opcode}, Name:EX9E, Group: {(opcode & 0xF000) >> 12}, X: {(opcode & 0x0F00) >> 8}, Y: {(opcode & 0x00F0) >> 4}, N: {opcode & 0x000F}, NN: {opcode & 0x00FF}, NNN: {opcode & 0x0FFF}")
