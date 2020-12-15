@@ -16,7 +16,7 @@ class Screen:
 		self.upscalling = upscalling
 
 		self.design = pygame.Surface([self.x, self.y])
-		self.window = pygame.display.set_mode([self.x*upscalling, self.y*upscalling])
+		self.window = pygame.display.set_mode([self.x*upscalling+200, self.y*upscalling+200])
 
 	def setPixel(self, coordinates, data, xor=False):
 		x = int(coordinates/self.x)
@@ -416,18 +416,23 @@ class CHIP8:
 			self.soundTimer -= 1
 
 	def cycle(self):
+		clock = pygame.time.Clock()
 		while True:
+			clock.tick(60)
 			try:
 				self.execute()
 			except:
 				break
 
 	def start(self):
+		clock = pygame.time.Clock()
 		done = False
 		while not done:
+			clock.tick(60)
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					done = True
+			
 			self.cycle()
 			if self.drawFlag:
 				self.graphics.draw()
